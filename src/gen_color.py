@@ -29,7 +29,7 @@ def check_suitability(background_image, text_color, max_diff = 150):
 def gen_text_color(background_image: np.ndarray, max_diff = 150):
     count_loop = 0
     while True:
-        if count_loop > 10000:
+        if count_loop > 1500:
             # raise ValueError("Can't find suitable text color") 
             return None
 

@@ -39,7 +39,7 @@ def box_gen(image_size,
     count_height_loop = 0
     count_intergral_loop = 0
     while True:
-        if count_height_loop > 10000 or count_intergral_loop > 10000:
+        if count_height_loop > 1500 or count_intergral_loop > 1500:
             return {
                     "box": None,
                     "text": text,
@@ -89,11 +89,11 @@ def text_gen():
         # texts_data = [x.strip('\n') for x in f.readlines()]
     
     return text
-    
+
 def random_multi_boxes(image_size, 
                        imageIntegral: np.ndarray,
                        n: int, 
-                       font: ImageFont, 
+                       font_list: list, 
                        scale = (0.05, 0.5),
                        font_range = (10, 100),
                        max_intergral = 20):
@@ -101,10 +101,11 @@ def random_multi_boxes(image_size,
     boxes_dict_list = [box_gen(image_size = image_size,
                                 imageIntegral = imageIntegral,
                                 text = text_gen(),
-                                font = font,
+                                font = random.choice(font_list),
                                 scale = scale,
                                 font_range = font_range,
                                 max_intergral = max_intergral) for _ in range(n)]
+
     boxes_dict_list = [x for x in boxes_dict_list if x['box'] is not None]
     if len(boxes_dict_list) < 1:
         return []
