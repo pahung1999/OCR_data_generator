@@ -11,6 +11,20 @@ def generate_random_color():
     return (r, g, b)
 
 def check_suitability(background_image, text_color, max_diff = 150):
+    """
+    Check the suitability of the text color for the given background image.
+
+    Args:
+        background_image: The background image as a NumPy array.
+        text_color: The RGB color value of the text.
+        max_diff (int): The maximum lightness difference between the text color and the background image.
+                        Default is 150.
+
+    Returns:
+        bool: True if the text color is suitable, False otherwise.
+
+    """
+
     # Convert the background image to HSL color space
     hsl_image = cv2.cvtColor(background_image, cv2.COLOR_BGR2HLS)
 
@@ -27,6 +41,18 @@ def check_suitability(background_image, text_color, max_diff = 150):
         return True
 
 def gen_text_color(background_image: np.ndarray, max_diff = 150):
+    """
+    Generate a suitable text color for the given background image.
+
+    Args:
+        background_image (np.ndarray): The background image as a NumPy array.
+        max_diff (int): The maximum lightness difference between the text color and the background image.
+                        Default is 150.
+
+    Returns:
+        Tuple[int, int, int]: The RGB color values of the text color.
+
+    """
     count_loop = 0
     while True:
         if count_loop > 1500:
@@ -39,7 +65,19 @@ def gen_text_color(background_image: np.ndarray, max_diff = 150):
         else:
             count_loop+=1
 
-def gen_text_color_v2(bg_img: np.ndarray, min_text_bg_rate = 4.5):
+def gen_text_color_v2(bg_img: np.ndarray, min_text_bg_rate = 4.5, max_loop = 1000):
+    """
+    Generate a suitable text color for the given background image using an alternative method.
+
+    Args:
+        bg_img (np.ndarray): The background image as a NumPy array.
+        min_text_bg_rate (float): The minimum text to background lightness ratio. Default is 4.5.
+        max_loop (int): The maximum number of loop iterations. Default is 1000.
+
+    Returns:
+        Tuple[int, int, int]: The RGB color values of the text color.
+
+    """
     mean_color = cv2.mean(bg_img)
     r, g, b = mean_color[2]/255, mean_color[1]/255, mean_color[0]/255
     # Sinh màu ngẫu nhiên
@@ -54,7 +92,7 @@ def gen_text_color_v2(bg_img: np.ndarray, min_text_bg_rate = 4.5):
     count = 0
     while contrast1 < min_text_bg_rate:
         count+=1
-        if count > 10000:
+        if count > max_loop:
             # raise ValueError("Can't find suitable text color") 
             return None
         # print("count: ",count, ". contrast1: ", contrast1)

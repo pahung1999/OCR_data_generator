@@ -7,7 +7,17 @@ import cv2
 
 
 def gen_imgInteval(image_in: np.ndarray):
-    
+    """
+    Generate the integral image of the input image.
+
+    Args:
+        image_in (np.ndarray): The input image as a NumPy array.
+    Returns:
+        np.ndarray: The integral image.
+    Raises:
+        ValueError: If the input image format is not supported.
+    """
+
     if len(image_in.shape) == 2:
         image_process = np.asarray(image_in)
     elif image_in.shape[2] == 3:
@@ -33,13 +43,33 @@ def box_gen(image_size,
             font: ImageFont,
             scale = (0.02, 0.5),
             font_range = (5, 50),
-            max_intergral = 20):
+            max_intergral = 20,
+            max_loop = 1000):
+    """
+    Generate a bounding box for the text within the specified image size and constraints.
+
+    Args:
+        image_size (tuple): The size of the image as a tuple (width, height).
+        imageIntegral (np.ndarray): The integral image.
+        text (str): The text to place within the bounding box.
+        font (ImageFont): The font to use for the text.
+        scale (tuple): The scale range of text box height and image height. Default is (0.02, 0.5).
+        font_range (tuple): The font size range. Default is (5, 50).
+        max_integral (float): The maximum integral value. Default is 20.
+        max_loop (int): The maximum number of loop iterations. Default is 1000.
+
+    Returns:
+        dict: The bounding box information as a dictionary with keys 'box', 'text', 'fontsize', 'font'.
+              If a suitable box cannot be found, 'box' will be None.
+
+    """
+
     W, H = image_size
     h_range = (H*scale[0], H*scale[1])
     count_height_loop = 0
     count_intergral_loop = 0
     while True:
-        if count_height_loop > 1500 or count_intergral_loop > 1500:
+        if count_height_loop > max_loop or count_intergral_loop > max_loop:
             return {
                     "box": None,
                     "text": text,
@@ -82,6 +112,13 @@ def box_gen(image_size,
 
 
 def text_gen():
+    """
+    Generate random text from txt files
+
+    Returns:
+        str: The generated random text.
+
+    """
     #Texts load
     texts_path = "./train_trg.txt"
     with open(texts_path,"r",encoding="utf-8") as f:
@@ -96,7 +133,26 @@ def random_multi_boxes(image_size,
                        font_list: list, 
                        scale = (0.05, 0.5),
                        font_range = (10, 100),
-                       max_intergral = 20):
+                       max_intergral = 20,
+                       max_loop = 1000):
+    """
+    Generate random multiple bounding boxes on the image.
+
+    Args:
+        image_size (tuple): The size of the image as a tuple (width, height).
+        imageIntegral (np.ndarray): The integral image.
+        n (int): The number of bounding boxes to generate.
+        font_list (list): The list of font objects to use.
+        scale (tuple): The scale range of text box height and image height. Default is (0.05, 0.5).
+        font_range (tuple): The font size range. Default is (10, 100).
+        max_integral (float): The maximum integral value. Default is 20.
+        max_loop (int): The maximum number of loop iterations. Default is 1000.
+
+    Returns:
+        list: A list of dictionaries containing the bounding box information for each box.
+              Each dictionary has keys 'box', 'text', 'fontsize', 'font'.
+
+    """
     #Gen random multi rectangle box on image
     boxes_dict_list = [box_gen(image_size = image_size,
                                 imageIntegral = imageIntegral,
@@ -104,7 +160,8 @@ def random_multi_boxes(image_size,
                                 font = random.choice(font_list),
                                 scale = scale,
                                 font_range = font_range,
-                                max_intergral = max_intergral) for _ in range(n)]
+                                max_intergral = max_intergral,
+                                max_loop = max_loop) for _ in range(n)]
 
     boxes_dict_list = [x for x in boxes_dict_list if x['box'] is not None]
     if len(boxes_dict_list) < 1:
@@ -121,6 +178,18 @@ def random_roi(
     scale=(0.05, 0.5),
     ratio=(0.5, 0.83),
 ):  
+    """
+    Generate a random rectangular region of interest (ROI) within the specified image size.
+
+    Args:
+        image_size (tuple): The size of the image as a tuple (width, height).
+        scale (tuple): The scale range for the ROI. Default is (0.05, 0.5).
+        ratio (tuple): The aspect ratio range for the ROI. Default is (0.5, 0.83).
+
+    Returns:
+        tuple: The ROI coordinates as a tuple (x1, y1, x2, y2).
+
+    """
     #Gen random a rectangle box on image
     # SR
     scale = random.uniform(*scale)
@@ -140,6 +209,19 @@ def random_roi(
 
 
 def random_multi_roi(size, n, scale, ratio):
+    """
+    Generate random multiple rectangular regions of interest (ROIs) within the specified image size.
+
+    Args:
+        size (tuple): The size of the image as a tuple (width, height).
+        n (int): The number of ROIs to generate.
+        scale (tuple): The scale range for the ROIs.
+        ratio (tuple): The aspect ratio range for the ROIs.
+
+    Returns:
+        list: A list of tuples containing the ROI coordinates (x1, y1, x2, y2).
+
+    """
     #Gen random multi rectangle box on image
     
     rois = torch.tensor([random_roi(size, scale, ratio) for _ in range(n)])

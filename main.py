@@ -16,13 +16,21 @@ import json
 
 
 MAX_SIZE = (2048, 2048)
-BOX_SCALE = (0.02, 0.5)
+BOX_SCALE = (0.05, 0.6)
 FONT_SIZE_RANGE = (10, 80)
 MAX_INTERGRAL = 40
-MIN_TEXT_BG_DIFF = 5
-MAX_BOXES_PER_IMAGE = 20
+MIN_TEXT_BG_DIFF = 4
+MAX_BOXES_PER_IMAGE = 15
+MAX_LOOP = 500
 
-sample_num = 5000
+sample_num = 10000
+
+font_dir = "./data/font/"
+bg_dir = "./data/background/"
+
+# Labelme Folder (output folder)
+labelme_dir = "/home/phung/AnhHung/data/ocr_data/text_on_bg/labelme2/"
+
 
 
 def plot_img(img, size=(8, 8)):
@@ -32,16 +40,11 @@ def plot_img(img, size=(8, 8)):
     plt.show()
 
 #Load font
-font_dir = "./data/font/"
 font_list =[]
 for filename in os.listdir(font_dir):
     font = ImageFont.truetype(os.path.join(font_dir, filename), size=50)
     font_list.append(font)
 
-bg_dir = "./data/background/"
-
-# Labelme Folder
-labelme_dir = "/home/phung/AnhHung/data/ocr_data/text_on_bg/labelme/"
 
 
 for sample_id in tqdm(range(sample_num)):
@@ -61,7 +64,8 @@ for sample_id in tqdm(range(sample_num)):
                     font_list = font_list,
                     scale = BOX_SCALE,
                     font_range = FONT_SIZE_RANGE,
-                    max_intergral = MAX_INTERGRAL)
+                    max_intergral = MAX_INTERGRAL,
+                    max_loop = MAX_LOOP)
 
     if len(boxes_dict) == 0:
         continue
@@ -73,7 +77,7 @@ for sample_id in tqdm(range(sample_num)):
         x2 = int(bbox[2])
         y2 = int(bbox[3])
         # box_dict['text_color'] = gen_text_color(np_image[y1:y2, x1:x2], max_diff = 5)
-        box_dict['text_color'] = gen_text_color_v2(np_image[y1:y2, x1:x2], min_text_bg_rate = MIN_TEXT_BG_DIFF)
+        box_dict['text_color'] = gen_text_color_v2(np_image[y1:y2, x1:x2], min_text_bg_rate = MIN_TEXT_BG_DIFF, max_loop = MAX_LOOP)
         if box_dict['text_color'] is None:
             continue
         else:
