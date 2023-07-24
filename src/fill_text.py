@@ -34,7 +34,7 @@ def fill_text_to_image(image: Image,
     return image
 
 
-def draw_rectangle(image, x1, y1, x2, y2, line_width = 2):
+def draw_rectangle(image, x1, y1, x2, y2, line_width = 2, color = "red"):
     """
     Draw a rectangle on the image with the specified coordinates.
 
@@ -56,6 +56,6 @@ def draw_rectangle(image, x1, y1, x2, y2, line_width = 2):
 
     # Draw the rectangle
     rectangle = [(x1, y1), (x2, y2)]
-    draw.rectangle(rectangle, outline='red', width=line_width)
+    draw.rectangle(rectangle, outline=color, width=line_width)
 
     return image

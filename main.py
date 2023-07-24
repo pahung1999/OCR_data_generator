@@ -20,16 +20,17 @@ BOX_SCALE = (0.05, 0.6)
 FONT_SIZE_RANGE = (10, 80)
 MAX_INTERGRAL = 40
 MIN_TEXT_BG_DIFF = 4
-MAX_BOXES_PER_IMAGE = 15
-MAX_LOOP = 500
+MAX_BOXES_PER_IMAGE = 20
+MAX_LOOP = 1000
 
+#Just max samples because if can't find a position to place text on background image -> skip
 sample_num = 10000
 
 font_dir = "./data/font/"
 bg_dir = "./data/background/"
 
 # Labelme Folder (output folder)
-labelme_dir = "/home/phung/AnhHung/data/ocr_data/text_on_bg/labelme2/"
+labelme_dir = "/home/phung/AnhHung/data/ocr_data/text_on_bg/labelme3/"
 
 
 
@@ -48,7 +49,8 @@ for filename in os.listdir(font_dir):
 
 
 for sample_id in tqdm(range(sample_num)):
-    bg_name = random.choice(os.listdir(bg_dir))
+    # bg_name = random.choice(os.listdir(bg_dir))
+    bg_name = os.listdir(bg_dir)[sample_id%len(os.listdir(bg_dir))]
     bg_path = os.path.join(bg_dir, bg_name)
 
     PIL_image = Image.open(bg_path)
@@ -87,6 +89,7 @@ for sample_id in tqdm(range(sample_num)):
 
     image_copy = PIL_image.copy()
     points = []
+    word_points = []
     for box_dict in new_boxes_dict:
         image_copy = fill_text_to_image(image = image_copy,
                         text = box_dict['text'],
@@ -102,11 +105,27 @@ for sample_id in tqdm(range(sample_num)):
                        [box[2], box[1]], 
                        [box[2], box[3]], 
                        [box[0], box[3]]])
+        
+        for box in box_dict['word_boxes']:
+            box = [int(x) for x in  box]
+            word_points.append([[box[0], box[1]], 
+                       [box[2], box[1]], 
+                       [box[2], box[3]], 
+                       [box[0], box[3]]])
     
     shapes = []
     for point in points:
         shapes.append({
             'label' : 'text', 
+            'points' : point, 
+            'group_id': None,
+            'shape_type': 'polygon',
+            'flags': {}
+        })
+
+    for point in word_points:
+        shapes.append({
+            'label' : 'word', 
             'points' : point, 
             'group_id': None,
             'shape_type': 'polygon',

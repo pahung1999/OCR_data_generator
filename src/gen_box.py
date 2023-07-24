@@ -37,6 +37,18 @@ def gen_imgInteval(image_in: np.ndarray):
     return image_integral
 
     
+def get_box_size(text: str,
+                font: ImageFont,
+                fontsize: int,
+                ):
+
+    font_copy = font.font_variant(size=fontsize)
+    x1, y1, x2, y2 = font_copy.getbbox(text, stroke_width=0)
+    text_width, text_height = x2 - x1, y2 - x1
+
+    return text_width, text_height
+
+
 def box_gen(image_size,
             imageIntegral: np.ndarray,
             text : str,
@@ -68,6 +80,7 @@ def box_gen(image_size,
     h_range = (H*scale[0], H*scale[1])
     count_height_loop = 0
     count_intergral_loop = 0
+    text = text.strip()
     while True:
         if count_height_loop > max_loop or count_intergral_loop > max_loop:
             return {
@@ -102,10 +115,27 @@ def box_gen(image_size,
             continue
         else:
             break
+    
+    text_box = [x1, y1, x2, y2]
+    words = text.split(" ")
+    words_size = [get_box_size(word, font, fontsize) for word in words]
+    space_width = get_box_size(" ", font, fontsize)[0]
+
+    word_boxes = []
+    last_x = text_box[0]
+    for i, word in enumerate(words):
+        word_width = words_size[i][0]
+        word_box = [last_x-space_width/2, text_box[1], last_x+word_width, text_box[3]]
+        word_boxes.append(word_box)
+        last_x += word_width + space_width
+
+        # print(word_box)
 
     return {
-        "box": [x1, y1, x2, y2],
+        "box": text_box,
         "text": text,
+        "words": words,
+        "word_boxes": word_boxes,
         "fontsize": fontsize,
         "font": font
     }
